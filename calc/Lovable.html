@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Calculator</title>
+    <meta name="description" content="A beautiful, functional calculator with modern design">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            padding: 20px;
+        }
+
+        .calculator {
+            width: 100%;
+            max-width: 400px;
+            background: #1c1c1c;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .display {
+            background: #2d2d2d;
+            border-radius: 16px;
+            padding: 32px 24px;
+            margin-bottom: 24px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        .display-previous {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 8px;
+            min-height: 24px;
+        }
+
+        .display-current {
+            font-size: 48px;
+            color: #fff;
+            font-weight: 300;
+            word-wrap: break-word;
+            word-break: break-all;
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            border-radius: 16px;
+            font-size: 24px;
+            font-weight: 400;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #fff;
+            background: #505050;
+            outline: none;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-function {
+            background: #a5a5a5;
+            color: #1c1c1c;
+            font-weight: 500;
+        }
+
+        .btn-operator {
+            background: #ff9f0a;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .btn-operator.active {
+            background: #fff;
+            color: #ff9f0a;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                max-width: 100%;
+            }
+
+            .display-current {
+                font-size: 36px;
+            }
+
+            button {
+                padding: 20px;
+                font-size: 20px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .calculator {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <main class="calculator">
+        <div class="display">
+            <div class="display-previous" id="previousOperand"></div>
+            <div class="display-current" id="currentOperand">0</div>
+        </div>
+        <div class="buttons">
+            <button class="btn-function" onclick="calculator.clear()">C</button>
+            <button class="btn-function" onclick="calculator.toggleSign()">±</button>
+            <button class="btn-function" onclick="calculator.percentage()">%</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('÷')">÷</button>
+
+            <button onclick="calculator.appendNumber('7')">7</button>
+            <button onclick="calculator.appendNumber('8')">8</button>
+            <button onclick="calculator.appendNumber('9')">9</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('×')">×</button>
+
+            <button onclick="calculator.appendNumber('4')">4</button>
+            <button onclick="calculator.appendNumber('5')">5</button>
+            <button onclick="calculator.appendNumber('6')">6</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('-')">−</button>
+
+            <button onclick="calculator.appendNumber('1')">1</button>
+            <button onclick="calculator.appendNumber('2')">2</button>
+            <button onclick="calculator.appendNumber('3')">3</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('+')">+</button>
+
+            <button class="btn-zero" onclick="calculator.appendNumber('0')">0</button>
+            <button onclick="calculator.appendNumber('.')">.</button>
+            <button class="btn-operator" onclick="calculator.compute()">=</button>
+        </div>
+    </main>
+
+    <script>
+        class Calculator {
+            constructor() {
+                this.currentOperand = '0';
+                this.previousOperand = '';
+                this.operation = undefined;
+                this.shouldResetScreen = false;
+            }
+
+            clear() {
+                this.currentOperand = '0';
+                this.previousOperand = '';
+                this.operation = undefined;
+                this.shouldResetScreen = false;
+                this.updateDisplay();
+            }
+
+            appendNumber(number) {
+                if (this.shouldResetScreen) {
+                    this.currentOperand = '0';
+                    this.shouldResetScreen = false;
+                }
+                
+                if (number === '.' && this.currentOperand.includes('.')) return;
+                
+                if (this.currentOperand === '0' && number !== '.') {
+                    this.currentOperand = number;
+                } else {
+                    this.currentOperand += number;
+                }
+                
+                this.updateDisplay();
+            }
+
+            chooseOperation(operation) {
+                if (this.currentOperand === '') return;
+                
+                if (this.previousOperand !== '') {
+                    this.compute();
+                }
+                
+                this.operation = operation;
+                this.previousOperand = this.currentOperand;
+                this.shouldResetScreen = true;
+                this.updateDisplay();
+            }
+
+            compute() {
+                let computation;
+                const prev = parseFloat(this.previousOperand);
+                const current = parseFloat(this.currentOperand);
+                
+                if (isNaN(prev) || isNaN(current)) return;
+                
+                switch (this.operation) {
+                    case '+':
+                        computation = prev + current;
+                        break;
+                    case '-':
+                        computation = prev - current;
+                        break;
+                    case '×':
+                        computation = prev * current;
+                        break;
+                    case '÷':
+                        if (current === 0) {
+                            alert('Cannot divide by zero');
+                            this.clear();
+                            return;
+                        }
+                        computation = prev / current;
+                        break;
+                    default:
+                        return;
+                }
+                
+                this.currentOperand = this.roundResult(computation).toString();
+                this.operation = undefined;
+                this.previousOperand = '';
+                this.shouldResetScreen = true;
+                this.updateDisplay();
+            }
+
+            roundResult(number) {
+                return Math.round(number * 100000000) / 100000000;
+            }
+
+            toggleSign() {
+                if (this.currentOperand === '0') return;
+                this.currentOperand = (parseFloat(this.currentOperand) * -1).toString();
+                this.updateDisplay();
+            }
+
+            percentage() {
+                this.currentOperand = (parseFloat(this.currentOperand) / 100).toString();
+                this.updateDisplay();
+            }
+
+            formatDisplayNumber(number) {
+                const stringNumber = number.toString();
+                const integerDigits = parseFloat(stringNumber.split('.')[0]);
+                const decimalDigits = stringNumber.split('.')[1];
+                let integerDisplay;
+                
+                if (isNaN(integerDigits)) {
+                    integerDisplay = '';
+                } else {
+                    integerDisplay = integerDigits.toLocaleString('en', {
+                        maximumFractionDigits: 0
+                    });
+                }
+                
+                if (decimalDigits != null) {
+                    return `${integerDisplay}.${decimalDigits}`;
+                } else {
+                    return integerDisplay;
+                }
+            }
+
+            updateDisplay() {
+                const currentOperandElement = document.getElementById('currentOperand');
+                const previousOperandElement = document.getElementById('previousOperand');
+                
+                currentOperandElement.textContent = this.formatDisplayNumber(this.currentOperand);
+                
+                if (this.operation != null) {
+                    previousOperandElement.textContent = 
+                        `${this.formatDisplayNumber(this.previousOperand)} ${this.operation}`;
+                } else {
+                    previousOperandElement.textContent = '';
+                }
+            }
+        }
+
+        const calculator = new Calculator();
+        calculator.updateDisplay();
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') calculator.appendNumber(e.key);
+            if (e.key === '.') calculator.appendNumber('.');
+            if (e.key === 'Enter' || e.key === '=') calculator.compute();
+            if (e.key === 'Escape') calculator.clear();
+            if (e.key === '+') calculator.chooseOperation('+');
+            if (e.key === '-') calculator.chooseOperation('-');
+            if (e.key === '*') calculator.chooseOperation('×');
+            if (e.key === '/') {
+                e.preventDefault();
+                calculator.chooseOperation('÷');
+            }
+            if (e.key === '%') calculator.percentage();
+        });
+    </script>
+</body>
+</html>
