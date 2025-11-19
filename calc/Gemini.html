@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        .calculator {
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 320px;
+            background-color: #ffffff;
+        }
+
+        #display {
+            width: 100%;
+            height: 70px;
+            font-size: 2.5em;
+            text-align: right;
+            padding: 15px;
+            border: none;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+            background-color: #f9f9f9;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .buttons {
+            display: grid;
+            /* 4 equal-width columns */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px; /* Creates thin lines between buttons */
+            background-color: #ddd; /* Grid gap color */
+        }
+
+        .btn {
+            font-size: 1.5em;
+            padding: 22px;
+            border: none;
+            cursor: pointer;
+            background-color: #fff;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .btn:active {
+            background-color: #e0e0e0;
+        }
+
+        /* Special button colors */
+        .btn.operator {
+            background-color: #ffb347; /* Light orange */
+            color: white;
+        }
+        .btn.operator:hover {
+            background-color: #fca130;
+        }
+        .btn.operator:active {
+            background-color: #f5951a;
+        }
+
+        .btn.clear {
+            background-color: #ff6961; /* Light red */
+            color: white;
+        }
+        .btn.clear:hover {
+            background-color: #e65048;
+        }
+        
+        .btn.function {
+            background-color: #e6e6e6;
+        }
+
+        .btn.equals {
+            background-color: #77dd77; /* Light green */
+            color: white;
+        }
+         .btn.equals:hover {
+            background-color: #68c468;
+        }
+         .btn.equals:active {
+            background-color: #5aaf5a;
+        }
+
+        /* Span the '0' button across 2 columns */
+        .btn.zero {
+            grid-column: span 2;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <input type="text" id="display" disabled placeholder="0">
+        
+        <div class="buttons">
+            <button class="btn clear" onclick="clearDisplay()">C</button>
+            <button class="btn function" onclick="backspace()">Del</button>
+            <button class="btn operator" onclick="appendToDisplay('%')">%</button>
+            <button class="btn operator" onclick="appendToDisplay('/')">/</button>
+
+            <button class="btn" onclick="appendToDisplay('7')">7</button>
+            <button class="btn" onclick="appendToDisplay('8')">8</button>
+            <button class="btn" onclick="appendToDisplay('9')">9</button>
+            <button class="btn operator" onclick="appendToDisplay('*')">*</button>
+
+            <button class="btn" onclick="appendToDisplay('4')">4</button>
+            <button class="btn" onclick="appendToDisplay('5')">5</button>
+            <button class="btn" onclick="appendToDisplay('6')">6</button>
+            <button class="btn operator" onclick="appendToDisplay('-')">-</button>
+
+            <button class="btn" onclick="appendToDisplay('1')">1</button>
+            <button class="btn" onclick="appendToDisplay('2')">2</button>
+            <button class="btn" onclick="appendToDisplay('3')">3</button>
+            <button class="btn operator" onclick="appendToDisplay('+')">+</button>
+
+            <button class="btn zero" onclick="appendToDisplay('0')">0</button>
+            <button class="btn" onclick="appendToDisplay('.')">.</button>
+            <button class="btn equals" onclick="calculateResult()">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+
+        // Appends the clicked button's value to the display
+        function appendToDisplay(value) {
+            display.value += value;
+        }
+
+        // Clears the entire display
+        function clearDisplay() {
+            display.value = '';
+        }
+
+        // Deletes the last character
+        function backspace() {
+            display.value = display.value.slice(0, -1);
+        }
+
+        // Calculates the result of the expression
+        function calculateResult() {
+            try {
+                // Replace % with /100 for calculation
+                let expression = display.value.replace(/%/g, '/100');
+                
+                // Use eval() to calculate the result.
+                // This is generally unsafe for production code but
+                // is the simplest way for a self-contained demo.
+                const result = eval(expression);
+                
+                // Avoid displaying 'undefined' or 'Infinity'
+                if (result === undefined || !isFinite(result)) {
+                    display.value = 'Error';
+                } else {
+                    display.value = result;
+                }
+            } catch (error) {
+                // If eval() fails (e.g., "5++2"), show an error
+                display.value = 'Error';
+            }
+        }
+    </script>
+
+</body>
+</html>
