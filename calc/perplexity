@@ -5,111 +5,112 @@
   <title>Simple Calculator</title>
   <style>
     body {
-      background: #f0f0f0;
       font-family: Arial, sans-serif;
       display: flex;
       height: 100vh;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+      background: #f9f9f9;
     }
     .calculator {
-      background: #222;
+      background: #fff;
+      box-shadow: 0px 0px 10px #ccc;
+      border-radius: 8px;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #0005;
       width: 320px;
     }
     .display {
       width: 100%;
-      height: 50px;
       font-size: 2em;
-      margin-bottom: 10px;
       text-align: right;
+      margin-bottom: 20px;
+      border: none;
+      background: #f0f0f0;
       padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background: #333;
-      color: #fff;
+      box-sizing: border-box;
+      border-radius: 4px;
     }
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+    .row {
+      display: flex;
+      margin-bottom: 10px;
     }
-    button {
-      font-size: 1.2em;
-      padding: 20px;
+    .btn {
+      flex: 1;
+      margin: 3px;
+      padding: 20px 0;
+      font-size: 1.1em;
       border: none;
-      border-radius: 5px;
-      background: #444;
-      color: #fff;
-      cursor: pointer;
+      border-radius: 4px;
+      background: #f5f5f5;
       transition: background 0.2s;
+      cursor: pointer;
     }
-    button.operator {
-      background: #ff9500;
-      color: #fff;
+    .btn:active {
+      background: #ddd;
     }
-    button.equal {
-      background: #34c759;
-      color: #fff;
-      grid-column: span 2;
+    .btn.operator {
+      background: #d6eafd;
+      color: #155a8a;
     }
-    button.clear {
-      background: #ff3b30;
-      color: #fff;
+    .btn.equal {
+      background: #a5d6a7;
+      color: #236123;
+      font-weight: bold;
+    }
+    .btn.clear {
+      background: #ffbdbd;
+      color: #8c1b1b;
     }
   </style>
 </head>
 <body>
   <div class="calculator">
     <input type="text" id="display" class="display" readonly>
-    <div class="buttons">
-      <button onclick="clearDisplay()" class="clear">C</button>
-      <button onclick="backspace()">⌫</button>
-      <button onclick="appendToDisplay('%')" class="operator">%</button>
-      <button onclick="appendToDisplay('/')" class="operator">÷</button>
-      <button onclick="appendToDisplay('7')">7</button>
-      <button onclick="appendToDisplay('8')">8</button>
-      <button onclick="appendToDisplay('9')">9</button>
-      <button onclick="appendToDisplay('*')" class="operator">×</button>
-      <button onclick="appendToDisplay('4')">4</button>
-      <button onclick="appendToDisplay('5')">5</button>
-      <button onclick="appendToDisplay('6')">6</button>
-      <button onclick="appendToDisplay('-')" class="operator">−</button>
-      <button onclick="appendToDisplay('1')">1</button>
-      <button onclick="appendToDisplay('2')">2</button>
-      <button onclick="appendToDisplay('3')">3</button>
-      <button onclick="appendToDisplay('+')" class="operator">+</button>
-      <button onclick="appendToDisplay('0')" style="grid-column: span 2;">0</button>
-      <button onclick="appendToDisplay('.')">.</button>
-      <button onclick="calculate()" class="equal">=</button>
+    <div class="row">
+      <button class="btn clear" onclick="clearDisplay()">C</button>
+      <button class="btn operator" onclick="inputValue('/')">/</button>
+      <button class="btn operator" onclick="inputValue('*')">*</button>
+      <button class="btn operator" onclick="backspace()">&larr;</button>
+    </div>
+    <div class="row">
+      <button class="btn" onclick="inputValue('7')">7</button>
+      <button class="btn" onclick="inputValue('8')">8</button>
+      <button class="btn" onclick="inputValue('9')">9</button>
+      <button class="btn operator" onclick="inputValue('-')">-</button>
+    </div>
+    <div class="row">
+      <button class="btn" onclick="inputValue('4')">4</button>
+      <button class="btn" onclick="inputValue('5')">5</button>
+      <button class="btn" onclick="inputValue('6')">6</button>
+      <button class="btn operator" onclick="inputValue('+')">+</button>
+    </div>
+    <div class="row">
+      <button class="btn" onclick="inputValue('1')">1</button>
+      <button class="btn" onclick="inputValue('2')">2</button>
+      <button class="btn" onclick="inputValue('3')">3</button>
+      <button class="btn equal" onclick="calculate()">=</button>
+    </div>
+    <div class="row">
+      <button class="btn" onclick="inputValue('0')">0</button>
+      <button class="btn" onclick="inputValue('.')">.</button>
     </div>
   </div>
   <script>
-    const display = document.getElementById('display');
-
-    function appendToDisplay(value) {
-      display.value += value;
+    let display = document.getElementById('display');
+    function inputValue(val) {
+      display.value += val;
     }
-
     function clearDisplay() {
       display.value = '';
     }
-
     function backspace() {
       display.value = display.value.slice(0, -1);
     }
-
     function calculate() {
       try {
-        // Replace '÷' and '×' with JS operators
-        let expression = display.value.replace(/÷/g, '/').replace(/×/g, '*');
-        // Handle percentage
-        expression = expression.replace(/%/g, '/100');
-        display.value = eval(expression);
+        display.value = eval(display.value);
       } catch {
-        display.value = 'Error';
+        display.value = "Error";
       }
     }
   </script>
