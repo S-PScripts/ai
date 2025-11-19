@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Simple Calculator</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .calculator {
+    background: #222;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    width: 320px;
+  }
+  .display {
+    background: #000;
+    color: #0f0;
+    font-size: 2.5em;
+    text-align: right;
+    padding: 20px 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    min-height: 70px;
+    word-break: break-all;
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.7);
+  }
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  button {
+    padding: 20px;
+    font-size: 1.4em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+  }
+  button:active {
+    transform: scale(0.95);
+  }
+  .number, .decimal {
+    background: #333;
+    color: white;
+  }
+  .number:hover, .decimal:hover { background: #444; }
+  .operator {
+    background: #ff9500;
+    color: white;
+  }
+  .operator:hover { background: #ffb143; }
+  .equals {
+    background: #0f0;
+    color: black;
+    grid-row: span 2;
+  }
+  .equals:hover { background: #0f0; filter: brightness(120%); }
+  .clear, .backspace {
+    background: #d43f3a;
+    color: white;
+  }
+  .clear:hover, .backspace:hover { background: #e74c3c; }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display" id="display">0</div>
+  <div class="buttons">
+    <button class="clear" onclick="clearDisplay()">C</button>
+    <button class="backspace" onclick="backspace()">←</button>
+    <button class="operator" onclick="appendToDisplay('/')">/</button>
+    <button class="operator" onclick="appendToDisplay('*')">×</button>
+
+    <button class="number" onclick="appendToDisplay('7')">7</button>
+    <button class="number" onclick="appendToDisplay('8')">8</button>
+    <button class="number" onclick="appendToDisplay('9')">9</button>
+    <button class="operator" onclick="appendToDisplay('-')">−</button>
+
+    <button class="number" onclick="appendToDisplay('4')">4</button>
+    <button class="number" onclick="appendToDisplay('5')">5</button>
+    <button class="number" onclick="appendToDisplay('6')">6</button>
+    <button class="operator" onclick="appendToDisplay('+')">+</button>
+
+    <button class="number" onclick="appendToDisplay('1')">1</button>
+    <button class="number" onclick="appendToDisplay('2')">2</button>
+    <button class="number" onclick="appendToDisplay('3')">3</button>
+    <button class="equals" onclick="calculate()" rowspan="2">=</button>
+
+    <button class="number zero" onclick="appendToDisplay('0')">0</button>
+    <button class="decimal" onclick="appendToDisplay('.')">.</button>
+  </div>
+</div>
+
+<script>
+let display = document.getElementById('display');
+let currentInput = '0';
+let shouldResetDisplay = false;
+
+function updateDisplay() {
+  display.textContent = currentInput;
+}
+
+function appendToDisplay(value) {
+  if (shouldResetDisplay) {
+    currentInput = '0';
+    shouldResetDisplay = false;
+  }
+  if (currentInput === '0' && value !== '.') {
+    currentInput = value;
+  } else {
+    currentInput += value;
+  }
+  updateDisplay();
+}
+
+function clearDisplay() {
+  currentInput = '0';
+  updateDisplay();
+}
+
+function backspace() {
+  if (currentInput.length > 1) {
+    currentInput = currentInput.slice(0, -1);
+  } else {
+    currentInput = '0';
+  }
+  updateDisplay();
+}
+
+function calculate() {
+  try {
+    // Replace × with * for JavaScript evaluation
+    let expression = currentInput.replace(/×/g, '*');
+    let result = Function('"use strict"; return (' + expression + ')')();
+    
+    // Round to avoid floating point issues (e.g., 0.1 + 0.2 = 0.3000000004)
+    result = Math.round(result * 100000000) / 100000000;
+    
+    currentInput = result.toString();
+    if (currentInput === 'NaN' || currentInput === 'Infinity') {
+      currentInput = 'Error';
+    }
+  } catch (e) {
+    currentInput = 'Error';
+  }
+  shouldResetDisplay = true;
+  updateDisplay();
+}
+
+// Initialize
+updateDisplay();
+</script>
+
+</body>
+</html>
