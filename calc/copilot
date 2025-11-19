@@ -1,44 +1,399 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Simple Calculator</title>
+  <meta charset="UTF-8" />
+  <title>Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    input, button { margin: 5px; padding: 10px; font-size: 16px; }
-    #result { margin-top: 10px; font-weight: bold; }
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --accent: #4cc9f0;
+      --accent-2: #f72585;
+      --text: #e6e6e6;
+      --muted: #a9b0be;
+      --btn: #202532;
+      --btn-hover: #2a3142;
+      --danger: #ff6b6b;
+      --success: #29bf12;
+      --shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      background: radial-gradient(1200px 500px at 20% 0%, #12151c 0%, var(--bg) 60%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .app {
+      width: 360px;
+      max-width: 95vw;
+      background: var(--panel);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid #232839;
+    }
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: linear-gradient(180deg, #1b2030 0%, #141824 100%);
+      border-bottom: 1px solid #232839;
+    }
+    .title h1 {
+      font-size: 16px;
+      margin: 0;
+      letter-spacing: 0.3px;
+      color: var(--muted);
+    }
+    .theme-toggle {
+      cursor: pointer;
+      border: 1px solid #2a3142;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .theme-toggle:hover { background: #1e2332; }
+
+    .display {
+      padding: 12px 16px;
+      background: #121520;
+      border-bottom: 1px solid #232839;
+    }
+    .expr {
+      min-height: 24px;
+      font-size: 14px;
+      color: var(--muted);
+      word-wrap: break-word;
+    }
+    .result {
+      min-height: 48px;
+      font-size: 28px;
+      font-weight: 600;
+      padding-top: 4px;
+      word-wrap: break-word;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 16px;
+      background: #161a28;
+    }
+    button.key {
+      appearance: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      background: var(--btn);
+      color: var(--text);
+      padding: 14px 12px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: transform 0.03s ease, background 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.35);
+      user-select: none;
+    }
+    button.key:active { transform: translateY(1px); }
+    button.key:hover { background: var(--btn-hover); }
+    .op { color: var(--accent); font-weight: 700; }
+    .danger { color: var(--danger); }
+    .eval { background: #233149; color: #cce8ff; border: 1px solid #29405f; }
+    .eval:hover { background: #29405f; }
+    .wide { grid-column: span 2; }
+    .accent { color: var(--accent-2); }
+    .success { color: var(--success); }
+
+    .footer {
+      padding: 10px 16px 14px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid #232839;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      background: #131725;
+    }
+
+    .history {
+      max-height: 110px;
+      overflow: auto;
+      padding: 8px 16px 12px;
+      border-top: 1px solid #232839;
+      background: #121520;
+    }
+    .history h2 {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.2px;
+    }
+    .hist-item {
+      font-size: 13px;
+      color: #c5cbe0;
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin: 4px 0;
+      background: #1a1f30;
+      border: 1px solid #22283b;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .hist-item:hover { background: #20263a; }
+    .hist-expr { color: var(--muted); }
+    .hist-res { color: #e9efff; font-weight: 600; }
+
+    @media (max-width: 400px) {
+      .result { font-size: 24px; }
+      button.key { padding: 12px 10px; font-size: 15px; }
+    }
   </style>
 </head>
 <body>
-  <h2>Simple Calculator</h2>
-  <input type="number" id="num1" placeholder="First number" />
-  <input type="number" id="num2" placeholder="Second number" />
-  <br/>
-  <button onclick="calculate('+')">Add</button>
-  <button onclick="calculate('-')">Subtract</button>
-  <button onclick="calculate('*')">Multiply</button>
-  <button onclick="calculate('/')">Divide</button>
-  <div id="result"></div>
+  <main class="app" role="application" aria-label="Calculator">
+    <div class="title">
+      <h1>Calculator</h1>
+      <button class="theme-toggle" id="themeBtn" aria-label="Toggle theme">Toggle theme</button>
+    </div>
+
+    <section class="display" aria-live="polite">
+      <div class="expr" id="expr"></div>
+      <div class="result" id="result">0</div>
+    </section>
+
+    <section class="grid" aria-label="Keys">
+      <!-- Row 1 -->
+      <button class="key danger" data-key="AC" title="All clear">AC</button>
+      <button class="key danger" data-key="C" title="Clear entry">C</button>
+      <button class="key op" data-key="%" title="Modulo">%</button>
+      <button class="key op" data-key="/" title="Divide">÷</button>
+
+      <!-- Row 2 -->
+      <button class="key" data-key="7">7</button>
+      <button class="key" data-key="8">8</button>
+      <button class="key" data-key="9">9</button>
+      <button class="key op" data-key="*" title="Multiply">×</button>
+
+      <!-- Row 3 -->
+      <button class="key" data-key="4">4</button>
+      <button class="key" data-key="5">5</button>
+      <button class="key" data-key="6">6</button>
+      <button class="key op" data-key="-" title="Subtract">−</button>
+
+      <!-- Row 4 -->
+      <button class="key" data-key="1">1</button>
+      <button class="key" data-key="2">2</button>
+      <button class="key" data-key="3">3</button>
+      <button class="key op" data-key="+" title="Add">+</button>
+
+      <!-- Row 5 -->
+      <button class="key" data-key="0" class="wide">0</button>
+      <button class="key" data-key="(" title="Left parenthesis">(</button>
+      <button class="key" data-key=")" title="Right parenthesis">)</button>
+      <button class="key eval" data-key="=" title="Equals">=</button>
+
+      <!-- Row 6 -->
+      <button class="key" data-key="." title="Decimal point">.</button>
+      <button class="key" data-key="±" title="Toggle sign">±</button>
+      <button class="key success" data-key="MR" title="Memory recall">MR</button>
+      <button class="key success" data-key="MS" title="Memory store">MS</button>
+
+      <!-- Row 7 -->
+      <button class="key success" data-key="M+" title="Memory add">M+</button>
+      <button class="key success" data-key="M-" title="Memory subtract">M-</button>
+      <button class="key" data-key="⌫" title="Backspace">⌫</button>
+      <button class="key accent" data-key="ANS" title="Use last answer">ANS</button>
+    </section>
+
+    <section class="history" id="history" aria-label="History">
+      <h2>History</h2>
+      <!-- history items appended here -->
+    </section>
+
+    <div class="footer">
+      <div>Keyboard: 0–9, + − × ÷, %, (), ., Enter =, Backspace ⌫</div>
+      <div id="memStatus" aria-live="polite">Memory: 0</div>
+    </div>
+  </main>
 
   <script>
-    function calculate(op) {
-      const n1 = parseFloat(document.getElementById('num1').value);
-      const n2 = parseFloat(document.getElementById('num2').value);
-      let res;
+    (function() {
+      const exprEl = document.getElementById('expr');
+      const resEl = document.getElementById('result');
+      const histEl = document.getElementById('history');
+      const memStatus = document.getElementById('memStatus');
+      const themeBtn = document.getElementById('themeBtn');
 
-      if (isNaN(n1) || isNaN(n2)) {
-        res = 'Please enter valid numbers.';
-      } else {
-        switch(op) {
-          case '+': res = n1 + n2; break;
-          case '-': res = n1 - n2; break;
-          case '*': res = n1 * n2; break;
-          case '/': res = n2 !== 0 ? n1 / n2 : 'Cannot divide by zero'; break;
-          default: res = 'Unknown operation';
+      let expression = '';
+      let lastAnswer = 0;
+      let memory = 0;
+      let dark = true;
+
+      function updateDisplay() {
+        exprEl.textContent = expression || '';
+        resEl.textContent = expression ? tryEval(expression) ?? 'Error' : String(lastAnswer);
+        memStatus.textContent = `Memory: ${memory}`;
+      }
+
+      function sanitize(input) {
+        // allow digits, operators, parentheses, decimal point, spaces
+        return input.replace(/[^0-9+\-*/%(). ]/g, '');
+      }
+
+      function tryEval(exp) {
+        const cleaned = sanitize(exp).replace(/÷/g, '/').replace(/×/g, '*');
+        // basic safety: reject if invalid sequence like multiple operators in a row (except minus for negative)
+        if (/[^0-9).]\s*[\/*+%]{2,}/.test(cleaned)) return null;
+        // prevent leading operator except minus or parenthesis
+        if (/^[*/+%]/.test(cleaned)) return null;
+
+        try {
+          // Evaluate using Function to avoid scope pollution
+          const val = Function('return (' + cleaned + ')')();
+          if (typeof val === 'number' && isFinite(val)) return roundSmart(val);
+          return null;
+        } catch {
+          return null;
         }
       }
 
-      document.getElementById('result').textContent = 'Result: ' + res;
-    }
+      function roundSmart(n) {
+        // avoid floating point artifacts (e.g., 0.1+0.2)
+        const rounded = Math.round(n * 1e12) / 1e12;
+        return rounded;
+      }
+
+      function pushHistory(exp, result) {
+        const item = document.createElement('div');
+        item.className = 'hist-item';
+        const left = document.createElement('div');
+        left.className = 'hist-expr';
+        left.textContent = exp;
+        const right = document.createElement('div');
+        right.className = 'hist-res';
+        right.textContent = result;
+        item.appendChild(left);
+        item.appendChild(right);
+        item.addEventListener('click', () => {
+          expression = exp;
+          lastAnswer = result;
+          updateDisplay();
+        });
+        histEl.appendChild(item);
+        // keep last 20 items
+        const items = histEl.querySelectorAll('.hist-item');
+        if (items.length > 20) items[0].remove();
+      }
+
+      function handleKey(k) {
+        switch (k) {
+          case 'AC':
+            expression = '';
+            lastAnswer = 0;
+            break;
+          case 'C':
+            expression = '';
+            break;
+          case '⌫':
+            expression = expression.slice(0, -1);
+            break;
+          case '=': {
+            const val = tryEval(expression);
+            if (val !== null) {
+              pushHistory(expression, val);
+              lastAnswer = val;
+              expression = String(val);
+            } else {
+              lastAnswer = 0;
+            }
+            break;
+          }
+          case '±': {
+            // If current token is a number, toggle its sign; otherwise prefix with -(
+            const m = expression.match(/(-?\d+(\.\d+)?)$/);
+            if (m) {
+              const num = parseFloat(m[0]) * -1;
+              expression = expression.slice(0, -m[0].length) + String(num);
+            } else if (expression) {
+              expression = '-(' + expression + ')';
+            } else {
+              expression = '-';
+            }
+            break;
+          }
+          case 'ANS':
+            expression += String(lastAnswer);
+            break;
+          case 'MS': {
+            const val = tryEval(expression);
+            if (val !== null) memory = val;
+            break;
+          }
+          case 'MR':
+            expression += String(memory);
+            break;
+          case 'M+': {
+            const val = tryEval(expression);
+            if (val !== null) memory = roundSmart(memory + val);
+            break;
+          }
+          case 'M-': {
+            const val = tryEval(expression);
+            if (val !== null) memory = roundSmart(memory - val);
+            break;
+          }
+          default:
+            expression += k;
+        }
+        updateDisplay();
+      }
+
+      // Button clicks
+      document.querySelectorAll('button.key').forEach(btn => {
+        btn.addEventListener('click', () => handleKey(btn.dataset.key));
+      });
+
+      // Keyboard support
+      const keyMap = {
+        'Enter': '=',
+        '=': '=',
+        'Backspace': '⌫',
+      };
+      window.addEventListener('keydown', (e) => {
+        const k = e.key;
+        if (keyMap[k]) { e.preventDefault(); handleKey(keyMap[k]); return; }
+        if (/[\d]/.test(k)) { handleKey(k); return; }
+        if (['+', '-', '*', '/', '%', '(', ')', '.'].includes(k)) { handleKey(k); return; }
+      });
+
+      // Theme toggle
+      themeBtn.addEventListener('click', () => {
+        dark = !dark;
+        document.documentElement.style.setProperty('--bg', dark ? '#0f1115' : '#f0f4f9');
+        document.documentElement.style.setProperty('--panel', dark ? '#171a21' : '#ffffff');
+        document.documentElement.style.setProperty('--text', dark ? '#e6e6e6' : '#0f1115');
+        document.documentElement.style.setProperty('--muted', dark ? '#8f98a7' : '#4a5568');
+        document.documentElement.style.setProperty('--btn', dark ? '#202532' : '#edf2f7');
+        document.documentElement.style.setProperty('--btn-hover', dark ? '#2a3142' : '#e2e8f0');
+        document.documentElement.style.setProperty('--shadow', dark ? '0 8px 24px rgba(0,0,0,0.35)' : '0 8px 24px rgba(0,0,0,0.12)');
+      });
+
+      // Initialize
+      updateDisplay();
+    })();
   </script>
 </body>
 </html>
