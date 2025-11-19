@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .calculator {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 24px;
+        width: 320px;
+      }
+
+      .display {
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+        text-align: right;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .display-previous {
+        color: #888;
+        font-size: 14px;
+        min-height: 20px;
+        margin-bottom: 4px;
+      }
+
+      .display-current {
+        color: #333;
+        font-size: 32px;
+        font-weight: 600;
+        word-wrap: break-word;
+        word-break: break-all;
+      }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      button {
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 600;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      button:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .operator {
+        background: #667eea;
+        color: white;
+      }
+
+      .operator:hover {
+        background: #5568d3;
+      }
+
+      .equals {
+        background: #48bb78;
+        color: white;
+      }
+
+      .equals:hover {
+        background: #38a169;
+      }
+
+      .clear {
+        background: #f56565;
+        color: white;
+      }
+
+      .clear:hover {
+        background: #e53e3e;
+      }
+
+      .zero {
+        grid-column: span 2;
+      }
+    </style>
+    <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+</head>
+  <body>
+    <div class="calculator">
+      <div class="display">
+        <div class="display-previous" id="previous"></div>
+        <div class="display-current" id="current">0</div>
+      </div>
+      <div class="buttons">
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button class="operator" onclick="deleteLast()">⌫</button>
+        <button class="operator" onclick="appendOperator('/')">÷</button>
+        <button class="operator" onclick="appendOperator('*')">×</button>
+        <button onclick="appendNumber('7')">7</button>
+        <button onclick="appendNumber('8')">8</button>
+        <button onclick="appendNumber('9')">9</button>
+        <button class="operator" onclick="appendOperator('-')">−</button>
+        <button onclick="appendNumber('4')">4</button>
+        <button onclick="appendNumber('5')">5</button>
+        <button onclick="appendNumber('6')">6</button>
+        <button class="operator" onclick="appendOperator('+')">+</button>
+        <button onclick="appendNumber('1')">1</button>
+        <button onclick="appendNumber('2')">2</button>
+        <button onclick="appendNumber('3')">3</button>
+        <button class="equals" onclick="calculate()">=</button>
+        <button class="zero" onclick="appendNumber('0')">0</button>
+        <button onclick="appendNumber('.')">.</button>
+      </div>
+    </div>
+
+    <script>
+      let currentValue = '0';
+      let previousValue = '';
+      let operation = null;
+      let shouldResetDisplay = false;
+
+      const currentDisplay = document.getElementById('current');
+      const previousDisplay = document.getElementById('previous');
+
+      function updateDisplay() {
+        currentDisplay.textContent = currentValue;
+        if (previousValue && operation) {
+          const operatorSymbol = {
+            '+': '+',
+            '-': '−',
+            '*': '×',
+            '/': '÷'
+          }[operation];
+          previousDisplay.textContent = `${previousValue} ${operatorSymbol}`;
+        } else {
+          previousDisplay.textContent = '';
+        }
+      }
+
+      function appendNumber(num) {
+        if (shouldResetDisplay) {
+          currentValue = num;
+          shouldResetDisplay = false;
+        } else {
+          if (num === '.' && currentValue.includes('.')) return;
+          currentValue = currentValue === '0' && num !== '.' ? num : currentValue + num;
+        }
+        updateDisplay();
+      }
+
+      function appendOperator(op) {
+        if (operation !== null && !shouldResetDisplay) {
+          calculate();
+        }
+        operation = op;
+        previousValue = currentValue;
+        shouldResetDisplay = true;
+        updateDisplay();
+      }
+
+      function calculate() {
+        if (operation === null || shouldResetDisplay) return;
+
+        const prev = parseFloat(previousValue);
+        const current = parseFloat(currentValue);
+
+        if (isNaN(prev) || isNaN(current)) return;
+
+        let result;
+        switch (operation) {
+          case '+':
+            result = prev + current;
+            break;
+          case '-':
+            result = prev - current;
+            break;
+          case '*':
+            result = prev * current;
+            break;
+          case '/':
+            result = current === 0 ? 'Error' : prev / current;
+            break;
+          default:
+            return;
+        }
+
+        currentValue = result === 'Error' ? result : String(Math.round(result * 100000000) / 100000000);
+        operation = null;
+        previousValue = '';
+        shouldResetDisplay = true;
+        updateDisplay();
+      }
+
+      function clearDisplay() {
+        currentValue = '0';
+        previousValue = '';
+        operation = null;
+        shouldResetDisplay = false;
+        updateDisplay();
+      }
+
+      function deleteLast() {
+        if (shouldResetDisplay) {
+          clearDisplay();
+          return;
+        }
+        currentValue = currentValue.length > 1 ? currentValue.slice(0, -1) : '0';
+        updateDisplay();
+      }
+
+      updateDisplay();
+    </script>
+  </body>
+</html>
