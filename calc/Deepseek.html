@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px;
+        }
+        
+        .calculator {
+            background-color: #1a1a2e;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 350px;
+        }
+        
+        .display {
+            background-color: #16213e;
+            color: white;
+            text-align: right;
+            padding: 25px 20px;
+            font-size: 2.5rem;
+            min-height: 120px;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+        
+        .previous-operand {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            min-height: 30px;
+        }
+        
+        .current-operand {
+            margin-top: 10px;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background-color: #0f3460;
+        }
+        
+        button {
+            border: none;
+            background-color: #1a1a2e;
+            color: white;
+            font-size: 1.5rem;
+            padding: 20px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        button:hover {
+            background-color: #2a2a3e;
+        }
+        
+        button:active {
+            background-color: #3a3a4e;
+            transform: scale(0.95);
+        }
+        
+        .operator {
+            background-color: #0f3460;
+            color: #4cc9f0;
+        }
+        
+        .operator:hover {
+            background-color: #1f4470;
+        }
+        
+        .equals {
+            background-color: #4cc9f0;
+            color: #1a1a2e;
+            grid-column: span 2;
+        }
+        
+        .equals:hover {
+            background-color: #5cd9ff;
+        }
+        
+        .clear {
+            background-color: #e94560;
+            color: white;
+        }
+        
+        .clear:hover {
+            background-color: #f95570;
+        }
+        
+        .zero {
+            grid-column: span 2;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">
+            <div class="previous-operand"></div>
+            <div class="current-operand">0</div>
+        </div>
+        <div class="buttons">
+            <button class="clear">C</button>
+            <button class="clear">CE</button>
+            <button class="operator">%</button>
+            <button class="operator">÷</button>
+            
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator">×</button>
+            
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator">-</button>
+            
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="operator">+</button>
+            
+            <button class="zero">0</button>
+            <button>.</button>
+            <button class="equals">=</button>
+        </div>
+    </div>
+    
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const display = document.querySelector('.current-operand');
+            const previousDisplay = document.querySelector('.previous-operand');
+            const buttons = document.querySelectorAll('button');
+            let currentOperand = '0';
+            let previousOperand = '';
+            let operation = null;
+            let resetScreen = false;
+            
+            // Update display
+            function updateDisplay() {
+                display.textContent = currentOperand;
+                if (operation != null) {
+                    previousDisplay.textContent = `${previousOperand} ${operation}`;
+                } else {
+                    previousDisplay.textContent = '';
+                }
+            }
+            
+            // Reset calculator
+            function reset() {
+                currentOperand = '0';
+                previousOperand = '';
+                operation = null;
+            }
+            
+            // Append number
+            function appendNumber(number) {
+                if (currentOperand === '0' || resetScreen) {
+                    currentOperand = number;
+                    resetScreen = false;
+                } else {
+                    currentOperand += number;
+                }
+            }
+            
+            // Choose operation
+            function chooseOperation(op) {
+                if (currentOperand === '') return;
+                
+                if (previousOperand !== '') {
+                    compute();
+                }
+                
+                operation = op;
+                previousOperand = currentOperand;
+                currentOperand = '';
+            }
+            
+            // Compute calculation
+            function compute() {
+                let computation;
+                const prev = parseFloat(previousOperand);
+                const current = parseFloat(currentOperand);
+                
+                if (isNaN(prev) || isNaN(current)) return;
+                
+                switch (operation) {
+                    case '+':
+                        computation = prev + current;
+                        break;
+                    case '-':
+                        computation = prev - current;
+                        break;
+                    case '×':
+                        computation = prev * current;
+                        break;
+                    case '÷':
+                        if (current === 0) {
+                            alert("Cannot divide by zero!");
+                            reset();
+                            return;
+                        }
+                        computation = prev / current;
+                        break;
+                    case '%':
+                        computation = prev % current;
+                        break;
+                    default:
+                        return;
+                }
+                
+                currentOperand = computation.toString();
+                operation = null;
+                previousOperand = '';
+            }
+            
+            // Add decimal point
+            function addDecimal() {
+                if (resetScreen) {
+                    currentOperand = '0.';
+                    resetScreen = false;
+                    return;
+                }
+                
+                if (currentOperand.includes('.')) return;
+                currentOperand += '.';
+            }
+            
+            // Handle button clicks
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (button.classList.contains('clear')) {
+                        if (button.textContent === 'C') {
+                            reset();
+                        } else {
+                            currentOperand = '0';
+                        }
+                    } else if (button.classList.contains('operator')) {
+                        chooseOperation(button.textContent);
+                    } else if (button.classList.contains('equals')) {
+                        compute();
+                        resetScreen = true;
+                    } else if (button.textContent === '.') {
+                        addDecimal();
+                    } else {
+                        appendNumber(button.textContent);
+                    }
+                    
+                    updateDisplay();
+                });
+            });
+            
+            // Initialize display
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
